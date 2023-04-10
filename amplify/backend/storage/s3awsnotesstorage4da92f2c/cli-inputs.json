@@ -1,0 +1,12 @@
+{
+  "resourceName": "s3awsnotesstorage4da92f2c",
+  "bucketName": "awsnotes-storage-4da92f2c",
+  "policyUUID": "763e90af",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ]
+}
