@@ -23,6 +23,7 @@ export default function NoteCreateForm(props) {
     onSuccess,
     onError,
     onSubmit,
+    onCancel,
     onValidate,
     onChange,
     overrides,
@@ -48,6 +49,8 @@ export default function NoteCreateForm(props) {
     setColor(initialValues.color);
     setErrors({});
   };
+  // used to change the background color of the form
+  const [formBgColor, setFormBgColor] = React.useState("#ffffff");
   const validations = {
     title: [{ type: "Required" }],
     image: [],
@@ -71,12 +74,22 @@ export default function NoteCreateForm(props) {
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
   };
+  const colors = [
+    { name: "yellow", hex: "#fff475" },
+    { name: "blue", hex: "#cbf0f8" },
+    { name: "pink", hex: "#fdcfe8" },
+    { name: "orange", hex: "#fbbc04" },
+    { name: "purple", hex: "#d7aefb" },
+    { name: "gray", hex: "#e8eaed" },
+  ];
   return (
     <Grid
       as="form"
       rowGap="15px"
       columnGap="15px"
       padding="20px"
+      style={{ backgroundColor: formBgColor }}
+
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
@@ -215,6 +228,7 @@ export default function NoteCreateForm(props) {
         placeholder="Please select an option"
         isDisabled={false}
         value={color}
+        display='none'
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
@@ -238,36 +252,54 @@ export default function NoteCreateForm(props) {
         {...getOverrideProps(overrides, "color")}
       >
         <option
-          children="yellow"
-          value="yellow"
+          children="#fff475"
+          value="#fff475"
           {...getOverrideProps(overrides, "coloroption0")}
         ></option>
         <option
-          children="blue"
-          value="blue"
+          children="#cbf0f8"
+          value="#cbf0f8"
           {...getOverrideProps(overrides, "coloroption1")}
         ></option>
         <option
-          children="pink"
-          value="pink"
+          children="#fdcfe8"
+          value="#fdcfe8"
           {...getOverrideProps(overrides, "coloroption2")}
         ></option>
         <option
-          children="orange"
-          value="orange"
+          children="#fbbc04"
+          value="#fbbc04"
           {...getOverrideProps(overrides, "coloroption3")}
         ></option>
         <option
-          children="purple"
-          value="purple"
+          children="#d7aefb"
+          value="#d7aefb"
           {...getOverrideProps(overrides, "coloroption4")}
         ></option>
         <option
-          children="gray"
-          value="gray"
+          children="#e8eaed"
+          value="#e8eaed"
           {...getOverrideProps(overrides, "coloroption5")}
         ></option>
       </SelectField>
+      <Flex>
+        {colors.map((colorObj) => (
+          <div
+            key={colorObj.name}
+            style={{
+              backgroundColor: colorObj.hex,
+              borderRadius: "50%",
+              width: "24px",
+              height: "24px",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setColor(colorObj.hex);
+              setFormBgColor(colorObj.hex);
+            }}
+          />
+        ))}
+      </Flex>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
@@ -286,7 +318,15 @@ export default function NoteCreateForm(props) {
           {...getOverrideProps(overrides, "RightAlignCTASubFlex")}
         >
           <Button
-            children="Submit"
+            children="Cancel"
+            type="button"
+            onClick={() => {
+              onCancel && onCancel();
+            }}
+            {...getOverrideProps(overrides, "CancelButton")}
+          ></Button>
+          <Button
+            children="Create"
             type="submit"
             variation="primary"
             isDisabled={Object.values(errors).some((e) => e?.hasError)}

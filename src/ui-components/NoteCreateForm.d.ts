@@ -39,6 +39,7 @@ export declare type NoteCreateFormProps = React.PropsWithChildren<{
     onSubmit?: (fields: NoteCreateFormInputValues) => NoteCreateFormInputValues;
     onSuccess?: (fields: NoteCreateFormInputValues) => void;
     onError?: (fields: NoteCreateFormInputValues, errorMessage: string) => void;
+    onCancel?: () => void;
     onChange?: (fields: NoteCreateFormInputValues) => NoteCreateFormInputValues;
     onValidate?: NoteCreateFormValidationValues;
 } & React.CSSProperties>;
