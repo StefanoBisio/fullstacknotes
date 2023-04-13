@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { DataStore } from '@aws-amplify/datastore';
 import { Note } from './models';
 
+//used to fetch the notes images from S3
+import { Storage } from '@aws-amplify/storage';
+
 import { Amplify } from 'aws-amplify';
 import awsExports from './aws-exports';
 import { NoteCreateForm } from './ui-components';
@@ -20,6 +23,8 @@ function App({ signOut, user }) {
 
   const [notesState, setNotesState] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [imageUrls, setImageUrls] = useState({});
+
 
   useEffect(() => {
     fetchNotes();
@@ -29,11 +34,33 @@ function App({ signOut, user }) {
     const notesArray = await DataStore.query(Note);
     console.log("Fetched notes:", notesArray);
     setNotesState(notesArray);
+    fetchImageUrls(notesArray);
+
+  };
+
+  const fetchImageUrls = async (notes) => {
+    const urls = {};
+    for (const note of notes) {
+      if (note.image) {
+        urls[note.image] = await Storage.get(note.image);
+      }
+    }
+    setImageUrls(urls);
   };
 
   //delete note
   const deleteNote = async (noteId) => {
     const modelToDelete = await DataStore.query(Note, noteId);
+
+    // If the note has an image, remove it from the storage
+    if (modelToDelete.image) {
+      try {
+        await Storage.remove(modelToDelete.image);
+      } catch (error) {
+        console.error('Error deleting image from storage:', error);
+      }
+    }
+
     await DataStore.delete(modelToDelete);
     fetchNotes(); // Refetch the notes after deletion
   };
@@ -58,7 +85,7 @@ function App({ signOut, user }) {
       </Grid>
 
       <View
-        style={showCreateForm ? { display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: '500px', zIndex: '2'} : { display: 'none' }}
+        style={showCreateForm ? { display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: '500px', zIndex: '2' } : { display: 'none' }}
       >
         <NoteCreateForm
           onSuccess={(note) => {
@@ -78,7 +105,7 @@ function App({ signOut, user }) {
               textAlign: 'left'
             }
           }}
-          
+
         />
       </View>
 
@@ -102,8 +129,9 @@ function App({ signOut, user }) {
             backgroundColor={item.color}
           >
             <Image
-              src={item.image}
-              alt="Glittering stream with old log, snowy mountain peaks tower over a green field."
+              src={imageUrls[item.image]}
+              alt="Note image"
+
             />
             <View padding="xs">
               <Heading padding="medium">{item.title}</Heading>

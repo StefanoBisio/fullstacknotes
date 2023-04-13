@@ -13,22 +13,22 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type NoteCreateFormInputValues = {
-    title?: string;
     image?: string;
+    title?: string;
     description?: string;
     color?: string;
 };
 export declare type NoteCreateFormValidationValues = {
-    title?: ValidationFunction<string>;
     image?: ValidationFunction<string>;
+    title?: ValidationFunction<string>;
     description?: ValidationFunction<string>;
     color?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type NoteCreateFormOverridesProps = {
     NoteCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
-    title?: PrimitiveOverrideProps<TextFieldProps>;
     image?: PrimitiveOverrideProps<TextFieldProps>;
+    title?: PrimitiveOverrideProps<TextFieldProps>;
     description?: PrimitiveOverrideProps<TextFieldProps>;
     color?: PrimitiveOverrideProps<SelectFieldProps>;
 } & EscapeHatchProps;

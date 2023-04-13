@@ -12,11 +12,17 @@ import {
   Grid,
   SelectField,
   TextField,
+  VisuallyHidden
 } from "@aws-amplify/ui-react";
 import { getOverrideProps } from "@aws-amplify/ui-react/internal";
 import { Note } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
+
+import DragDropFileInput from '../dragDropInput/DragDropFileInput';
+import { Storage } from "@aws-amplify/storage"
+
+
 export default function NoteCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -49,6 +55,34 @@ export default function NoteCreateForm(props) {
     setColor(initialValues.color);
     setErrors({});
   };
+
+  // used to know which image to delete when the user click the "Clear" button
+  const [uploadedFileKey, setUploadedFileKey] = React.useState("");
+
+
+  //function passed to the DragDropFileInput component to handle the file upload
+  const handleFileSelect = async (file) => {
+
+    try {
+      const result = await Storage.put(file.name, file, {
+        contentType: file.type,
+        level: 'public',
+      });
+
+      setImage(result.key);
+
+      // Update the image field with the S3 file key
+      console.log('Uploaded file name:', result.key);
+      
+      // used to know which image to delete when the user click the "Clear" button
+      setUploadedFileKey(result.key);
+      
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
+  };
+
+
   // used to change the background color of the form
   const [formBgColor, setFormBgColor] = React.useState("#ffffff");
   const validations = {
@@ -98,6 +132,7 @@ export default function NoteCreateForm(props) {
           description,
           color,
         };
+
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
             if (Array.isArray(modelFields[fieldName])) {
@@ -118,7 +153,7 @@ export default function NoteCreateForm(props) {
           return;
         }
         if (onSubmit) {
-          modelFields = onSubmit(modelFields);
+          modelFields = onSubmit(modelFields);          
         }
         try {
           Object.entries(modelFields).forEach(([key, value]) => {
@@ -169,33 +204,36 @@ export default function NoteCreateForm(props) {
         hasError={errors.title?.hasError}
         {...getOverrideProps(overrides, "title")}
       ></TextField>
-      <TextField
-        label="Image"
-        isRequired={false}
-        isReadOnly={false}
-        value={image}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              title,
-              image: value,
-              description,
-              color,
-            };
-            const result = onChange(modelFields);
-            value = result?.image ?? value;
-          }
-          if (errors.image?.hasError) {
-            runValidationTasks("image", value);
-          }
-          setImage(value);
-        }}
-        onBlur={() => runValidationTasks("image", image)}
-        errorMessage={errors.image?.errorMessage}
-        hasError={errors.image?.hasError}
-        {...getOverrideProps(overrides, "image")}
-      ></TextField>
+      <DragDropFileInput onFileSelect={handleFileSelect}/>
+      <VisuallyHidden>
+        <TextField
+          label="Image"
+          isRequired={false}
+          isReadOnly={false}
+          value={image}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (onChange) {
+              const modelFields = {
+                title,
+                image: value,
+                description,
+                color,
+              };
+              const result = onChange(modelFields);
+              value = result?.image ?? value;
+            }
+            if (errors.image?.hasError) {
+              runValidationTasks("image", value);
+            }
+            setImage(value);
+          }}
+          onBlur={() => runValidationTasks("image", image)}
+          errorMessage={errors.image?.errorMessage}
+          hasError={errors.image?.hasError}
+          {...getOverrideProps(overrides, "image")}
+        ></TextField>
+      </VisuallyHidden>
       <TextField
         label="Description"
         isRequired={false}
@@ -307,9 +345,19 @@ export default function NoteCreateForm(props) {
         <Button
           children="Clear"
           type="reset"
+          // Clear the form and delete the file from S3
           onClick={(event) => {
             event.preventDefault();
             resetStateValues();
+            if (uploadedFileKey) {
+              // Delete the file from S3
+              Storage.remove(uploadedFileKey)
+                .then(() => console.log("Deleted file:", uploadedFileKey))
+                .catch((error) =>
+                  console.error("Error deleting file:", uploadedFileKey, error)
+                );
+            }
+            setUploadedFileKey("");
           }}
           {...getOverrideProps(overrides, "ClearButton")}
         ></Button>
