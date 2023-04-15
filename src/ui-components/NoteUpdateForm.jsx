@@ -57,6 +57,30 @@ export default function NoteUpdateForm(props) {
     setErrors({});
     
   };
+
+  //function passed to the DragDropFileInput component to handle the note update
+  //THIS FUNCTION IS NOT ENOUGH AS THE DRAGDROPFILEINPUT COMPONENT NEEDS TO BE UPDATED TO BE INITIALISED WITH THE CURRENT IMAGE OF THE NOTE BEIN UPDATED
+  const handleFileUpdate = async (file) => {
+
+    try {
+      const result = await Storage.put(file.name, file, {
+        contentType: file.type,
+        level: 'public',
+      });
+
+      setImage(result.key);
+
+      // Update the image field with the S3 file key
+      console.log('Uploaded file name:', result.key);
+      
+      // used to know which image to delete when the user click the "Clear" button
+      setUploadedFileKey(result.key);
+      
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
+  };
+
   const [noteRecord, setNoteRecord] = React.useState(noteModelProp);
   React.useEffect(() => {
     const queryData = async () => {
@@ -151,7 +175,7 @@ export default function NoteUpdateForm(props) {
       {...getOverrideProps(overrides, "NoteUpdateForm")}
       {...rest}
     >
-    <DragDropFileInput />
+    <DragDropFileInput onFileSelect={handleFileUpdate} existingImageData={image} />
     <VisuallyHidden>
       <TextField
         label="Image"

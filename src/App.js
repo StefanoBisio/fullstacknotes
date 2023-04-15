@@ -135,7 +135,7 @@ function App({ signOut, user }) {
           }}
           onCancel={() => setShowUpdateForm(false)}
           onError={() => setShowUpdateForm(true)}
-          id={updateFormData}
+          note={updateFormData}
 
           overrides={{
             title: {

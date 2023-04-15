@@ -6,6 +6,7 @@ import './dragDropFileInput.css';
 const DragDropFileInput = ({ onFileSelect, resetKey }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [imageURL, setImageURL] = useState(null);
+  // const [imageToUpdate, setImageToUpdate] = useState(null);
 
   useEffect(() => {
     // Reset the state when the resetKey prop changes
@@ -29,19 +30,21 @@ const DragDropFileInput = ({ onFileSelect, resetKey }) => {
     e.stopPropagation();
   }, []);
 
-  // this is called when the file is selected or dropped
-  // it will upload the file to S3 and then set the image URL to display
+// this is called when the file is selected or dropped, after the file checks have been performed.
+// If gives the parent component the name of the image file to upload to S3
   const setImgURLInState = async (file) => {
     
     // this function is being passed in from the parent component
-    // it will set the image file in the parent component's state
+    // it will set the image name in the parent component's state
     await onFileSelect(file);
 
-    // get the URL of the uploaded file from S3 and set it as the image URL to display on the form
+    // The below is not necessary for the component to work, but it is useful as it derives the URL of the uploaded image from S3 and sets it as the image URL to display inside of the drag and drop area
     const url = await Storage.get(file.name);
     setImageURL(url);
   };
 
+  // checks the file to make sure it is an image and is smaller than 200KB
+  // if the checks are successful, it calls setImgURLInState() which is being passed by the parent component. it will set the image URL in the parent component's state
   const processFile = (file) => {
     if (!file.type.startsWith('image/')) {
       alert('Please upload an image file.');
@@ -92,6 +95,7 @@ const DragDropFileInput = ({ onFileSelect, resetKey }) => {
             type="file"
             id="file-input"
             className="file-input"
+            // this is called when the file is selected through the file picker. If omitted the file checks of processFile() will only be performed when the file is dragged and dropped
             onChange={(e) => processFile(e.target.files[0])}
           />
         </div>

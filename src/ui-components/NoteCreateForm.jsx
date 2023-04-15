@@ -74,6 +74,7 @@ export default function NoteCreateForm(props) {
         level: 'public',
       });
 
+      // Update the image field with the URL of the uploaded file
       setImage(result.key);
 
       // Update the image field with the S3 file key
