@@ -9,7 +9,7 @@ import { Storage } from '@aws-amplify/storage';
 
 import { Amplify } from 'aws-amplify';
 import awsExports from './aws-exports';
-import { NoteCreateForm } from './ui-components';
+import { NoteCreateForm, NoteUpdateForm } from './ui-components';
 
 import { Button, Heading, withAuthenticator, Card, Collection, Image, Icon, View, Divider, Flex, Grid } from '@aws-amplify/ui-react';
 
@@ -23,6 +23,7 @@ function App({ signOut, user }) {
 
   const [notesState, setNotesState] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [imageUrls, setImageUrls] = useState({});
 
   useEffect(() => {
@@ -76,7 +77,7 @@ function App({ signOut, user }) {
 
   return (
 
-    <View className={`App ${showCreateForm && 'modal-open'}`}>
+    <View className={`App ${showCreateForm || showUpdateForm ? 'modal-open' : ''}`}>
 
       <Grid as="nav" justifyContent="space-between" padding="medium">
         <Heading level={1}>AWS Notes</Heading>
@@ -84,6 +85,10 @@ function App({ signOut, user }) {
         <Button onClick={signOut}>Sign out</Button>
       </Grid>
 
+      <Button onClick={() => setShowCreateForm(true)}>Add Note</Button>
+
+
+      {/* open NoteCreateForm form */}
       <View
         style={showCreateForm ? { display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: '500px', zIndex: '2' } : { display: 'none' }}
       >
@@ -109,7 +114,33 @@ function App({ signOut, user }) {
         />
       </View>
 
-      <Button onClick={() => setShowCreateForm(true)}>Add Note</Button>
+      {/* open showUpdateForm form */}
+
+      <View
+        style={showUpdateForm ? { display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: '500px', zIndex: '2' } : { display: 'none' }}
+      >
+        <NoteUpdateForm
+          onSuccess={(note) => {
+            fetchNotes();
+            setShowUpdateForm(false);
+          }}
+          onCancel={() => setShowUpdateForm(false)}
+          onError={() => setShowUpdateForm(true)}
+
+          overrides={{
+            title: {
+              style: { backgroundColor: 'white' },
+              textAlign: 'left'
+            },
+            description: {
+              style: { backgroundColor: 'white' },
+              textAlign: 'left'
+            }
+          }}
+
+        />
+      </View>
+
 
 
       <Collection
@@ -143,7 +174,7 @@ function App({ signOut, user }) {
               <Flex
                 justifyContent="center"
               >
-                <Button variation="primary" >
+                <Button variation="primary" onClick={() => setShowUpdateForm(true)} >
                   Edit
                 </Button>
                 <Button
