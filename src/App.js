@@ -25,7 +25,6 @@ function App({ signOut, user }) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [imageUrls, setImageUrls] = useState({});
 
-
   useEffect(() => {
     fetchNotes();
   }, []);
@@ -56,6 +55,7 @@ function App({ signOut, user }) {
     if (modelToDelete.image) {
       try {
         await Storage.remove(modelToDelete.image);
+        console.log('Successfully deleted image from storage. Image name: '+ modelToDelete.image);
       } catch (error) {
         console.error('Error deleting image from storage:', error);
       }
@@ -130,7 +130,7 @@ function App({ signOut, user }) {
           >
             <Image
               src={imageUrls[item.image]}
-              alt="Note image"
+              alt=""
 
             />
             <View padding="xs">

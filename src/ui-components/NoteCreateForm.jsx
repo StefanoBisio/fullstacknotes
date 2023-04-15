@@ -54,11 +54,16 @@ export default function NoteCreateForm(props) {
     setDescription(initialValues.description);
     setColor(initialValues.color);
     setErrors({});
+    setFormBgColor("#ffffff");
+    setUploadedFileKey("");
+    setResetKey(resetKey + 1);
   };
 
   // used to know which image to delete when the user click the "Clear" button
   const [uploadedFileKey, setUploadedFileKey] = React.useState("");
 
+  //this is used to indicate to the DragDropFileInput component that the user created a new note, so it should reset its own state.
+  const [resetKey, setResetKey] = React.useState(0);
 
   //function passed to the DragDropFileInput component to handle the file upload
   const handleFileSelect = async (file) => {
@@ -204,7 +209,7 @@ export default function NoteCreateForm(props) {
         hasError={errors.title?.hasError}
         {...getOverrideProps(overrides, "title")}
       ></TextField>
-      <DragDropFileInput onFileSelect={handleFileSelect}/>
+      <DragDropFileInput onFileSelect={handleFileSelect} resetKey={resetKey} />
       <VisuallyHidden>
         <TextField
           label="Image"

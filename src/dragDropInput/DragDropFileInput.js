@@ -1,12 +1,16 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Storage } from "@aws-amplify/storage";
 
 import './dragDropFileInput.css';
 
-const DragDropFileInput = ({ onFileSelect }) => {
+const DragDropFileInput = ({ onFileSelect, resetKey }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [imageURL, setImageURL] = useState(null);
-  
+
+  useEffect(() => {
+    // Reset the state when the resetKey prop changes
+    setImageURL(null);
+  }, [resetKey]);
 
   const handleDragEnter = useCallback((e) => {
     e.preventDefault();
