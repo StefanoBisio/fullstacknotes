@@ -6,11 +6,20 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
+import {
+  Button,
+  Flex,
+  Grid,
+  SelectField,
+  TextField,
+  VisuallyHidden
+} from "@aws-amplify/ui-react";
 import { getOverrideProps } from "@aws-amplify/ui-react/internal";
 import { Note } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
+import DragDropFileInput from '../dragDropInput/DragDropFileInput';
+
 export default function NoteUpdateForm(props) {
   const {
     id: idProp,
@@ -18,19 +27,20 @@ export default function NoteUpdateForm(props) {
     onSuccess,
     onError,
     onSubmit,
+    onCancel,
     onValidate,
     onChange,
     overrides,
     ...rest
   } = props;
   const initialValues = {
-    title: "",
     image: "",
+    title: "",
     description: "",
     color: "",
   };
-  const [title, setTitle] = React.useState(initialValues.title);
   const [image, setImage] = React.useState(initialValues.image);
+  const [title, setTitle] = React.useState(initialValues.title);
   const [description, setDescription] = React.useState(
     initialValues.description
   );
@@ -40,11 +50,12 @@ export default function NoteUpdateForm(props) {
     const cleanValues = noteRecord
       ? { ...initialValues, ...noteRecord }
       : initialValues;
-    setTitle(cleanValues.title);
     setImage(cleanValues.image);
+    setTitle(cleanValues.title);
     setDescription(cleanValues.description);
     setColor(cleanValues.color);
     setErrors({});
+    
   };
   const [noteRecord, setNoteRecord] = React.useState(noteModelProp);
   React.useEffect(() => {
@@ -53,13 +64,14 @@ export default function NoteUpdateForm(props) {
         ? await DataStore.query(Note, idProp)
         : noteModelProp;
       setNoteRecord(record);
+      console.log("record", record)
     };
     queryData();
   }, [idProp, noteModelProp]);
   React.useEffect(resetStateValues, [noteRecord]);
   const validations = {
-    title: [{ type: "Required" }],
     image: [],
+    title: [{ type: "Required" }],
     description: [],
     color: [],
   };
@@ -89,8 +101,8 @@ export default function NoteUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          title,
           image,
+          title,
           description,
           color,
         };
@@ -139,6 +151,36 @@ export default function NoteUpdateForm(props) {
       {...getOverrideProps(overrides, "NoteUpdateForm")}
       {...rest}
     >
+    <DragDropFileInput />
+    <VisuallyHidden>
+      <TextField
+        label="Image"
+        isRequired={false}
+        isReadOnly={false}
+        value={image}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              image: value,
+              title,
+              description,
+              color,
+            };
+            const result = onChange(modelFields);
+            value = result?.image ?? value;
+          }
+          if (errors.image?.hasError) {
+            runValidationTasks("image", value);
+          }
+          setImage(value);
+        }}
+        onBlur={() => runValidationTasks("image", image)}
+        errorMessage={errors.image?.errorMessage}
+        hasError={errors.image?.hasError}
+        {...getOverrideProps(overrides, "image")}
+      ></TextField>
+    </VisuallyHidden>
       <TextField
         label="Title"
         isRequired={true}
@@ -148,8 +190,8 @@ export default function NoteUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              title: value,
               image,
+              title: value,
               description,
               color,
             };
@@ -167,33 +209,6 @@ export default function NoteUpdateForm(props) {
         {...getOverrideProps(overrides, "title")}
       ></TextField>
       <TextField
-        label="Image"
-        isRequired={false}
-        isReadOnly={false}
-        value={image}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              title,
-              image: value,
-              description,
-              color,
-            };
-            const result = onChange(modelFields);
-            value = result?.image ?? value;
-          }
-          if (errors.image?.hasError) {
-            runValidationTasks("image", value);
-          }
-          setImage(value);
-        }}
-        onBlur={() => runValidationTasks("image", image)}
-        errorMessage={errors.image?.errorMessage}
-        hasError={errors.image?.hasError}
-        {...getOverrideProps(overrides, "image")}
-      ></TextField>
-      <TextField
         label="Description"
         isRequired={false}
         isReadOnly={false}
@@ -202,8 +217,8 @@ export default function NoteUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              title,
               image,
+              title,
               description: value,
               color,
             };
@@ -220,17 +235,17 @@ export default function NoteUpdateForm(props) {
         hasError={errors.description?.hasError}
         {...getOverrideProps(overrides, "description")}
       ></TextField>
-      <TextField
+      <SelectField
         label="Color"
-        isRequired={false}
-        isReadOnly={false}
+        placeholder="Please select an option"
+        isDisabled={false}
         value={color}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              title,
               image,
+              title,
               description,
               color: value,
             };
@@ -246,7 +261,38 @@ export default function NoteUpdateForm(props) {
         errorMessage={errors.color?.errorMessage}
         hasError={errors.color?.hasError}
         {...getOverrideProps(overrides, "color")}
-      ></TextField>
+      >
+        <option
+          children="#fff475"
+          value="#fff475"
+          {...getOverrideProps(overrides, "coloroption0")}
+        ></option>
+        <option
+          children="#cbf0f8"
+          value="#cbf0f8"
+          {...getOverrideProps(overrides, "coloroption1")}
+        ></option>
+        <option
+          children="#fdcfe8"
+          value="#fdcfe8"
+          {...getOverrideProps(overrides, "coloroption2")}
+        ></option>
+        <option
+          children="#fbbc04"
+          value="#fbbc04"
+          {...getOverrideProps(overrides, "coloroption3")}
+        ></option>
+        <option
+          children="#d7aefb"
+          value="#d7aefb"
+          {...getOverrideProps(overrides, "coloroption4")}
+        ></option>
+        <option
+          children="#e8eaed"
+          value="#e8eaed"
+          {...getOverrideProps(overrides, "coloroption5")}
+        ></option>
+      </SelectField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
@@ -265,6 +311,14 @@ export default function NoteUpdateForm(props) {
           gap="15px"
           {...getOverrideProps(overrides, "RightAlignCTASubFlex")}
         >
+          <Button
+            children="Cancel"
+            type="button"
+            onClick={() => {
+              onCancel && onCancel();
+            }}
+            {...getOverrideProps(overrides, "CancelButton")}
+          ></Button>
           <Button
             children="Submit"
             type="submit"

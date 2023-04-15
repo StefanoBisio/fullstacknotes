@@ -182,33 +182,6 @@ export default function NoteCreateForm(props) {
       {...getOverrideProps(overrides, "NoteCreateForm")}
       {...rest}
     >
-      <TextField
-        label="Title"
-        isRequired={true}
-        isReadOnly={false}
-        value={title}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              title: value,
-              image,
-              description,
-              color,
-            };
-            const result = onChange(modelFields);
-            value = result?.title ?? value;
-          }
-          if (errors.title?.hasError) {
-            runValidationTasks("title", value);
-          }
-          setTitle(value);
-        }}
-        onBlur={() => runValidationTasks("title", title)}
-        errorMessage={errors.title?.errorMessage}
-        hasError={errors.title?.hasError}
-        {...getOverrideProps(overrides, "title")}
-      ></TextField>
       <DragDropFileInput onFileSelect={handleFileSelect} resetKey={resetKey} />
       <VisuallyHidden>
         <TextField
@@ -239,6 +212,33 @@ export default function NoteCreateForm(props) {
           {...getOverrideProps(overrides, "image")}
         ></TextField>
       </VisuallyHidden>
+      <TextField
+        label="Title"
+        isRequired={true}
+        isReadOnly={false}
+        value={title}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              title: value,
+              image,
+              description,
+              color,
+            };
+            const result = onChange(modelFields);
+            value = result?.title ?? value;
+          }
+          if (errors.title?.hasError) {
+            runValidationTasks("title", value);
+          }
+          setTitle(value);
+        }}
+        onBlur={() => runValidationTasks("title", title)}
+        errorMessage={errors.title?.errorMessage}
+        hasError={errors.title?.hasError}
+        {...getOverrideProps(overrides, "title")}
+      ></TextField>
       <TextField
         label="Description"
         isRequired={false}

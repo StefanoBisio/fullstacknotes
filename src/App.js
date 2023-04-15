@@ -24,6 +24,7 @@ function App({ signOut, user }) {
   const [notesState, setNotesState] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [updateFormData, setUpdateFormData] = useState([]);
   const [imageUrls, setImageUrls] = useState({});
 
   useEffect(() => {
@@ -35,7 +36,6 @@ function App({ signOut, user }) {
     console.log("Fetched notes:", notesArray);
     setNotesState(notesArray);
     fetchImageUrls(notesArray);
-
   };
 
   const fetchImageUrls = async (notes) => {
@@ -66,6 +66,14 @@ function App({ signOut, user }) {
     fetchNotes(); // Refetch the notes after deletion
   };
 
+  //update note
+  const initializeUpdateForm = async (noteId) => {
+    const noteToUpdate = await DataStore.query(Note, noteId);
+    const idProp = noteToUpdate;
+    setShowUpdateForm(true);
+    setUpdateFormData(idProp);
+  };
+
   const IconDelete = () => {
     return (
       <Icon
@@ -93,7 +101,7 @@ function App({ signOut, user }) {
         style={showCreateForm ? { display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: '500px', zIndex: '2' } : { display: 'none' }}
       >
         <NoteCreateForm
-          onSuccess={(note) => {
+          onSuccess={() => {
             fetchNotes();
             setShowCreateForm(false);
           }}
@@ -119,13 +127,15 @@ function App({ signOut, user }) {
       <View
         style={showUpdateForm ? { display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: '500px', zIndex: '2' } : { display: 'none' }}
       >
+      {showUpdateForm && (
         <NoteUpdateForm
-          onSuccess={(note) => {
+          onSuccess={() => {
             fetchNotes();
             setShowUpdateForm(false);
           }}
           onCancel={() => setShowUpdateForm(false)}
           onError={() => setShowUpdateForm(true)}
+          id={updateFormData}
 
           overrides={{
             title: {
@@ -137,11 +147,9 @@ function App({ signOut, user }) {
               textAlign: 'left'
             }
           }}
-
         />
+      )}
       </View>
-
-
 
       <Collection
         items={notesState}
@@ -174,7 +182,7 @@ function App({ signOut, user }) {
               <Flex
                 justifyContent="center"
               >
-                <Button variation="primary" onClick={() => setShowUpdateForm(true)} >
+                <Button variation="primary" onClick={() => initializeUpdateForm(item.id)} >
                   Edit
                 </Button>
                 <Button
