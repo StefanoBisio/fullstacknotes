@@ -18,10 +18,10 @@ import { getOverrideProps } from "@aws-amplify/ui-react/internal";
 import { Note } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
-
-import DragDropFileInput from '../dragDropInput/DragDropFileInput';
 import { Storage } from "@aws-amplify/storage"
 
+//used as a replacement for the "Image" field in the form
+import DragDropFileInput from '../dragDropInput/DragDropFileInput';
 
 export default function NoteCreateForm(props) {
   const {
@@ -185,10 +185,13 @@ export default function NoteCreateForm(props) {
       {...rest}
     >
       <DragDropFileInput 
-      
+        //the function onFileSelect is passed to the DragDropFileInput component by both NoteUpdateForm and NoteCreateForm. But each form will handle the file upload differently.
         onFileSelect={handleFileSelect} 
-        //this tells DragDropFileInput to reset its state 
-        resetKey={resetKey} />
+
+        //this is used to tell DragDropFileInput to reset its state 
+        resetKey={resetKey} 
+      />
+
       <VisuallyHidden>
         <TextField
           label="Image"

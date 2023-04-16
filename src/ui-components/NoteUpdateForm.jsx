@@ -20,6 +20,7 @@ import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
 import { Storage } from "@aws-amplify/storage"
 
+//used as a replacement for the "Image" field in the form
 import DragDropFileInput from '../dragDropInput/DragDropFileInput';
 
 export default function NoteUpdateForm(props) {
@@ -59,15 +60,11 @@ export default function NoteUpdateForm(props) {
     setDescription(cleanValues.description);
     setColor(cleanValues.color);
     setErrors({});
-    setFormBgColor(color);
     setResetKey(resetKey + 1);
   };
 
-  //this is used to indicate to the DragDropFileInput component that the user updated a note, so it should reset its own state.
+  //this is used to reset the state of the child component DragDropFileInput when Reset is clicked.
   const [resetKey, setResetKey] = React.useState(0);
-
-  // used to change the background color of the form
-  const [formBgColor, setFormBgColor] = React.useState(color);
 
   //function passed to the DragDropFileInput component to handle the file upload
   const handleFileSelect = async (file) => {
@@ -86,10 +83,12 @@ export default function NoteUpdateForm(props) {
       if (noteRecord.image) {
         await Storage.remove(noteRecord.image);
       }
-      //delete previos image from the note record
+
+      // Update the note record with the new image key and save it
+      //https://docs.amplify.aws/lib/datastore/data-access/q/platform/js/#create-and-update
       await DataStore.save(
         Note.copyOf(noteRecord, (updated) => {
-          updated.image = null;
+          updated.image = result.key;
         })
       );
 
@@ -152,7 +151,7 @@ export default function NoteUpdateForm(props) {
       rowGap="15px"
       columnGap="15px"
       padding="20px"
-      //display the background color of the note, but update it if changed by the user
+      //display the background color of the note, but update it if the user selects a new one
       style={{ backgroundColor: userSelectedColor || noteRecord.color }}
 
       onSubmit={async (event) => {
@@ -213,10 +212,12 @@ export default function NoteUpdateForm(props) {
         // passing the entire note record to the DragDropFileInput component
         noteRecord={noteRecord}
 
+        //the function onFileSelect is passed to the DragDropFileInput component by both NoteUpdateForm and NoteCreateForm. But each form will handle the file upload differently.
         onFileSelect={handleFileSelect}
 
-        //this tells DragDropFileInput to reset its state 
-        resetKey={resetKey} />
+        //this is used to tell DragDropFileInput to reset its state 
+        resetKey={resetKey} 
+      />
       <VisuallyHidden>
         <TextField
           label="Image"
@@ -373,7 +374,6 @@ export default function NoteUpdateForm(props) {
             }}
             onClick={() => {
               setColor(colorObj.hex);
-              setFormBgColor(colorObj.hex);
               setUserSelectedColor(colorObj.hex);
             }}
           />
