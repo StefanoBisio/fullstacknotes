@@ -96,9 +96,17 @@ function App({ signOut, user }) {
       <Button onClick={() => setShowCreateForm(true)}>Add Note</Button>
 
 
-      {/* open NoteCreateForm form */}
+    {showCreateForm && (
       <View
-        style={showCreateForm ? { display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: '500px', zIndex: '2' } : { display: 'none' }}
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '90%',
+          maxWidth: '500px',
+          zIndex: '2',
+        }}
       >
         <NoteCreateForm
           onSuccess={() => {
@@ -118,14 +126,21 @@ function App({ signOut, user }) {
               textAlign: 'left'
             }
           }}
-
         />
       </View>
+    )}
 
-      {/* open showUpdateForm form */}
-
+    {showUpdateForm && (
       <View
-        style={showUpdateForm ? { display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', maxWidth: '500px', zIndex: '2' } : { display: 'none' }}
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '90%',
+          maxWidth: '500px',
+          zIndex: '2',
+        }}
       >
       {showUpdateForm && (
         <NoteUpdateForm
@@ -150,6 +165,7 @@ function App({ signOut, user }) {
         />
       )}
       </View>
+    )}
 
       <Collection
         items={notesState}
