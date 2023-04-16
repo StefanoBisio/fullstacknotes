@@ -66,7 +66,7 @@ function App({ signOut, user }) {
     fetchNotes(); // Refetch the notes after deletion
   };
 
-  //update note
+  //Open the update form and feed it the data of the note to update
   const initializeUpdateForm = async (noteId) => {
     const noteToUpdate = await DataStore.query(Note, noteId);
     const idProp = noteToUpdate;

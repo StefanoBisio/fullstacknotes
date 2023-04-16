@@ -18,6 +18,8 @@ import { getOverrideProps } from "@aws-amplify/ui-react/internal";
 import { Note } from "../models";
 import { fetchByPath, validateField } from "./utils";
 import { DataStore } from "aws-amplify";
+import { Storage } from "@aws-amplify/storage"
+
 import DragDropFileInput from '../dragDropInput/DragDropFileInput';
 
 export default function NoteUpdateForm(props) {
@@ -45,6 +47,8 @@ export default function NoteUpdateForm(props) {
     initialValues.description
   );
   const [color, setColor] = React.useState(initialValues.color);
+  const [userSelectedColor, setUserSelectedColor] = React.useState(null);
+
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = noteRecord
@@ -55,33 +59,47 @@ export default function NoteUpdateForm(props) {
     setDescription(cleanValues.description);
     setColor(cleanValues.color);
     setErrors({});
-    
+    setFormBgColor(color);
+    setResetKey(resetKey + 1);
   };
 
-  //function passed to the DragDropFileInput component to handle the note update
-  //THIS FUNCTION IS NOT ENOUGH AS THE DRAGDROPFILEINPUT COMPONENT NEEDS TO BE UPDATED TO BE INITIALISED WITH THE CURRENT IMAGE OF THE NOTE BEIN UPDATED
-  const handleFileUpdate = async (file) => {
+  //this is used to indicate to the DragDropFileInput component that the user updated a note, so it should reset its own state.
+  const [resetKey, setResetKey] = React.useState(0);
+
+  // used to change the background color of the form
+  const [formBgColor, setFormBgColor] = React.useState(color);
+
+  //function passed to the DragDropFileInput component to handle the file upload
+  const handleFileSelect = async (file) => {
 
     try {
+      //upload new image to storage
       const result = await Storage.put(file.name, file, {
         contentType: file.type,
         level: 'public',
       });
 
+      // Update the image field with the URL of the uploaded file
       setImage(result.key);
 
-      // Update the image field with the S3 file key
-      console.log('Uploaded file name:', result.key);
-      
-      // used to know which image to delete when the user click the "Clear" button
-      setUploadedFileKey(result.key);
-      
+      //delete previous image from storage
+      if (noteRecord.image) {
+        await Storage.remove(noteRecord.image);
+      }
+      //delete previos image from the note record
+      await DataStore.save(
+        Note.copyOf(noteRecord, (updated) => {
+          updated.image = null;
+        })
+      );
+
     } catch (error) {
       console.error('Error uploading file:', error);
     }
   };
 
   const [noteRecord, setNoteRecord] = React.useState(noteModelProp);
+
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
@@ -92,6 +110,7 @@ export default function NoteUpdateForm(props) {
     };
     queryData();
   }, [idProp, noteModelProp]);
+
   React.useEffect(resetStateValues, [noteRecord]);
   const validations = {
     image: [],
@@ -99,6 +118,7 @@ export default function NoteUpdateForm(props) {
     description: [],
     color: [],
   };
+
   const runValidationTasks = async (
     fieldName,
     currentValue,
@@ -116,12 +136,25 @@ export default function NoteUpdateForm(props) {
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
   };
+
+  const colors = [
+    { name: "yellow", hex: "#fff475" },
+    { name: "blue", hex: "#cbf0f8" },
+    { name: "pink", hex: "#fdcfe8" },
+    { name: "orange", hex: "#fbbc04" },
+    { name: "purple", hex: "#d7aefb" },
+    { name: "gray", hex: "#e8eaed" },
+  ];
+
   return (
     <Grid
       as="form"
       rowGap="15px"
       columnGap="15px"
       padding="20px"
+      //display the background color of the note, but update it if changed by the user
+      style={{ backgroundColor: userSelectedColor || noteRecord.color }}
+
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
@@ -175,36 +208,44 @@ export default function NoteUpdateForm(props) {
       {...getOverrideProps(overrides, "NoteUpdateForm")}
       {...rest}
     >
-    <DragDropFileInput onFileSelect={handleFileUpdate} existingImageData={image} />
-    <VisuallyHidden>
-      <TextField
-        label="Image"
-        isRequired={false}
-        isReadOnly={false}
-        value={image}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              image: value,
-              title,
-              description,
-              color,
-            };
-            const result = onChange(modelFields);
-            value = result?.image ?? value;
-          }
-          if (errors.image?.hasError) {
-            runValidationTasks("image", value);
-          }
-          setImage(value);
-        }}
-        onBlur={() => runValidationTasks("image", image)}
-        errorMessage={errors.image?.errorMessage}
-        hasError={errors.image?.hasError}
-        {...getOverrideProps(overrides, "image")}
-      ></TextField>
-    </VisuallyHidden>
+      <DragDropFileInput
+
+        // passing the entire note record to the DragDropFileInput component
+        noteRecord={noteRecord}
+
+        onFileSelect={handleFileSelect}
+
+        //this tells DragDropFileInput to reset its state 
+        resetKey={resetKey} />
+      <VisuallyHidden>
+        <TextField
+          label="Image"
+          isRequired={false}
+          isReadOnly={false}
+          value={image || ''}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (onChange) {
+              const modelFields = {
+                image: value,
+                title,
+                description,
+                color,
+              };
+              const result = onChange(modelFields);
+              value = result?.image ?? value;
+            }
+            if (errors.image?.hasError) {
+              runValidationTasks("image", value);
+            }
+            setImage(value);
+          }}
+          onBlur={() => runValidationTasks("image", image)}
+          errorMessage={errors.image?.errorMessage}
+          hasError={errors.image?.hasError}
+          {...getOverrideProps(overrides, "image")}
+        ></TextField>
+      </VisuallyHidden>
       <TextField
         label="Title"
         isRequired={true}
@@ -236,7 +277,7 @@ export default function NoteUpdateForm(props) {
         label="Description"
         isRequired={false}
         isReadOnly={false}
-        value={description}
+        value={description || ''}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
@@ -259,64 +300,85 @@ export default function NoteUpdateForm(props) {
         hasError={errors.description?.hasError}
         {...getOverrideProps(overrides, "description")}
       ></TextField>
-      <SelectField
-        label="Color"
-        placeholder="Please select an option"
-        isDisabled={false}
-        value={color}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              image,
-              title,
-              description,
-              color: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.color ?? value;
-          }
-          if (errors.color?.hasError) {
-            runValidationTasks("color", value);
-          }
-          setColor(value);
-        }}
-        onBlur={() => runValidationTasks("color", color)}
-        errorMessage={errors.color?.errorMessage}
-        hasError={errors.color?.hasError}
-        {...getOverrideProps(overrides, "color")}
-      >
-        <option
-          children="#fff475"
-          value="#fff475"
-          {...getOverrideProps(overrides, "coloroption0")}
-        ></option>
-        <option
-          children="#cbf0f8"
-          value="#cbf0f8"
-          {...getOverrideProps(overrides, "coloroption1")}
-        ></option>
-        <option
-          children="#fdcfe8"
-          value="#fdcfe8"
-          {...getOverrideProps(overrides, "coloroption2")}
-        ></option>
-        <option
-          children="#fbbc04"
-          value="#fbbc04"
-          {...getOverrideProps(overrides, "coloroption3")}
-        ></option>
-        <option
-          children="#d7aefb"
-          value="#d7aefb"
-          {...getOverrideProps(overrides, "coloroption4")}
-        ></option>
-        <option
-          children="#e8eaed"
-          value="#e8eaed"
-          {...getOverrideProps(overrides, "coloroption5")}
-        ></option>
-      </SelectField>
+      <VisuallyHidden>
+        <SelectField
+          label="Color"
+          placeholder="Please select an option"
+          isDisabled={false}
+          value={color}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (onChange) {
+              const modelFields = {
+                image,
+                title,
+                description,
+                color: value,
+              };
+              const result = onChange(modelFields);
+              value = result?.color ?? value;
+            }
+            if (errors.color?.hasError) {
+              runValidationTasks("color", value);
+            }
+            setColor(value);
+          }}
+          onBlur={() => runValidationTasks("color", color)}
+          errorMessage={errors.color?.errorMessage}
+          hasError={errors.color?.hasError}
+          {...getOverrideProps(overrides, "color")}
+        >
+          <option
+            children="#fff475"
+            value="#fff475"
+            {...getOverrideProps(overrides, "coloroption0")}
+          ></option>
+          <option
+            children="#cbf0f8"
+            value="#cbf0f8"
+            {...getOverrideProps(overrides, "coloroption1")}
+          ></option>
+          <option
+            children="#fdcfe8"
+            value="#fdcfe8"
+            {...getOverrideProps(overrides, "coloroption2")}
+          ></option>
+          <option
+            children="#fbbc04"
+            value="#fbbc04"
+            {...getOverrideProps(overrides, "coloroption3")}
+          ></option>
+          <option
+            children="#d7aefb"
+            value="#d7aefb"
+            {...getOverrideProps(overrides, "coloroption4")}
+          ></option>
+          <option
+            children="#e8eaed"
+            value="#e8eaed"
+            {...getOverrideProps(overrides, "coloroption5")}
+          ></option>
+        </SelectField>
+      </VisuallyHidden>
+      <Flex>
+        {colors.map((colorObj) => (
+          <div
+            key={colorObj.name}
+            style={{
+              backgroundColor: colorObj.hex,
+              borderRadius: "50%",
+              width: "24px",
+              height: "24px",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setColor(colorObj.hex);
+              setFormBgColor(colorObj.hex);
+              setUserSelectedColor(colorObj.hex);
+            }}
+          />
+        ))}
+      </Flex>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

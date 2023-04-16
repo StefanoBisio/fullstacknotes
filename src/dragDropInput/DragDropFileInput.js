@@ -3,15 +3,27 @@ import { Storage } from "@aws-amplify/storage";
 
 import './dragDropFileInput.css';
 
-const DragDropFileInput = ({ onFileSelect, resetKey }) => {
+const DragDropFileInput = ({ onFileSelect, resetKey, noteRecord }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [imageURL, setImageURL] = useState(null);
-  // const [imageToUpdate, setImageToUpdate] = useState(null);
 
   useEffect(() => {
     // Reset the state when the resetKey prop changes
     setImageURL(null);
   }, [resetKey]);
+
+  useEffect(() => {
+    // if noteRecord is passed in, it means that the component is being used to update an existing note. This funcion takes the image name from the noteRecord and uses it to derive the image URL from S3
+    const fetchImageURL = async () => {
+      if (noteRecord && noteRecord.image) {
+        const url = await Storage.get(noteRecord?.image);
+        console.log(url)
+        setImageURL(url);
+
+      }
+    };
+    fetchImageURL();
+  }, [noteRecord]);
 
   const handleDragEnter = useCallback((e) => {
     e.preventDefault();
@@ -30,10 +42,10 @@ const DragDropFileInput = ({ onFileSelect, resetKey }) => {
     e.stopPropagation();
   }, []);
 
-// this is called when the file is selected or dropped, after the file checks have been performed.
-// If gives the parent component the name of the image file to upload to S3
+  // this is called when the file is selected or dropped, after the file checks have been performed.
+  // If gives the parent component the name of the image file to upload to S3
   const setImgURLInState = async (file) => {
-    
+
     // this function is being passed in from the parent component
     // it will set the image name in the parent component's state
     await onFileSelect(file);

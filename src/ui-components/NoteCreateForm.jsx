@@ -39,7 +39,7 @@ export default function NoteCreateForm(props) {
     title: "",
     image: "",
     description: "",
-    color: "",
+    color: "#ffffff",
   };
   const [title, setTitle] = React.useState(initialValues.title);
   const [image, setImage] = React.useState(initialValues.image);
@@ -91,6 +91,7 @@ export default function NoteCreateForm(props) {
 
   // used to change the background color of the form
   const [formBgColor, setFormBgColor] = React.useState("#ffffff");
+
   const validations = {
     title: [{ type: "Required" }],
     image: [],
@@ -183,7 +184,11 @@ export default function NoteCreateForm(props) {
       {...getOverrideProps(overrides, "NoteCreateForm")}
       {...rest}
     >
-      <DragDropFileInput onFileSelect={handleFileSelect} resetKey={resetKey} />
+      <DragDropFileInput 
+      
+        onFileSelect={handleFileSelect} 
+        //this tells DragDropFileInput to reset its state 
+        resetKey={resetKey} />
       <VisuallyHidden>
         <TextField
           label="Image"
@@ -267,65 +272,66 @@ export default function NoteCreateForm(props) {
         hasError={errors.description?.hasError}
         {...getOverrideProps(overrides, "description")}
       ></TextField>
-      <SelectField
-        label="Color"
-        placeholder="Please select an option"
-        isDisabled={false}
-        value={color}
-        display='none'
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              title,
-              image,
-              description,
-              color: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.color ?? value;
-          }
-          if (errors.color?.hasError) {
-            runValidationTasks("color", value);
-          }
-          setColor(value);
-        }}
-        onBlur={() => runValidationTasks("color", color)}
-        errorMessage={errors.color?.errorMessage}
-        hasError={errors.color?.hasError}
-        {...getOverrideProps(overrides, "color")}
-      >
-        <option
-          children="#fff475"
-          value="#fff475"
-          {...getOverrideProps(overrides, "coloroption0")}
-        ></option>
-        <option
-          children="#cbf0f8"
-          value="#cbf0f8"
-          {...getOverrideProps(overrides, "coloroption1")}
-        ></option>
-        <option
-          children="#fdcfe8"
-          value="#fdcfe8"
-          {...getOverrideProps(overrides, "coloroption2")}
-        ></option>
-        <option
-          children="#fbbc04"
-          value="#fbbc04"
-          {...getOverrideProps(overrides, "coloroption3")}
-        ></option>
-        <option
-          children="#d7aefb"
-          value="#d7aefb"
-          {...getOverrideProps(overrides, "coloroption4")}
-        ></option>
-        <option
-          children="#e8eaed"
-          value="#e8eaed"
-          {...getOverrideProps(overrides, "coloroption5")}
-        ></option>
-      </SelectField>
+      <VisuallyHidden>
+        <SelectField
+          label="Color"
+          placeholder="Please select an option"
+          isDisabled={false}
+          value={color}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (onChange) {
+              const modelFields = {
+                title,
+                image,
+                description,
+                color: value,
+              };
+              const result = onChange(modelFields);
+              value = result?.color ?? value;
+            }
+            if (errors.color?.hasError) {
+              runValidationTasks("color", value);
+            }
+            setColor(value);
+          }}
+          onBlur={() => runValidationTasks("color", color)}
+          errorMessage={errors.color?.errorMessage}
+          hasError={errors.color?.hasError}
+          {...getOverrideProps(overrides, "color")}
+        >
+          <option
+            children="#fff475"
+            value="#fff475"
+            {...getOverrideProps(overrides, "coloroption0")}
+          ></option>
+          <option
+            children="#cbf0f8"
+            value="#cbf0f8"
+            {...getOverrideProps(overrides, "coloroption1")}
+          ></option>
+          <option
+            children="#fdcfe8"
+            value="#fdcfe8"
+            {...getOverrideProps(overrides, "coloroption2")}
+          ></option>
+          <option
+            children="#fbbc04"
+            value="#fbbc04"
+            {...getOverrideProps(overrides, "coloroption3")}
+          ></option>
+          <option
+            children="#d7aefb"
+            value="#d7aefb"
+            {...getOverrideProps(overrides, "coloroption4")}
+          ></option>
+          <option
+            children="#e8eaed"
+            value="#e8eaed"
+            {...getOverrideProps(overrides, "coloroption5")}
+          ></option>
+        </SelectField>
+      </VisuallyHidden>
       <Flex>
         {colors.map((colorObj) => (
           <div
