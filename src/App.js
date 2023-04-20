@@ -14,6 +14,8 @@ import { NoteCreateForm, NoteUpdateForm } from './ui-components';
 import { Button, Heading, withAuthenticator, Card, Collection, Image, Icon, View, Divider, Flex, Grid } from '@aws-amplify/ui-react';
 
 import './App.css';
+
+//styling for the Amplify UI components 
 import '@aws-amplify/ui-react/styles.css';
 
 Amplify.configure(awsExports);
@@ -56,7 +58,7 @@ function App({ signOut, user }) {
     if (modelToDelete.image) {
       try {
         await Storage.remove(modelToDelete.image);
-        console.log('Successfully deleted image from storage. Image name: '+ modelToDelete.image);
+        console.log('Successfully deleted image from storage. Image name: ' + modelToDelete.image);
       } catch (error) {
         console.error('Error deleting image from storage:', error);
       }
@@ -87,92 +89,105 @@ function App({ signOut, user }) {
 
     <View className={`App ${showCreateForm || showUpdateForm ? 'modal-open' : ''}`}>
 
-      <Grid as="nav" justifyContent="space-between" padding="medium">
-        <Heading level={1}>AWS Notes</Heading>
-        <Heading level={2}>Hello {user.attributes.email}</Heading>
-        <Button onClick={signOut}>Sign out</Button>
-      </Grid>
+      <Flex
+        as="nav"
+        padding="medium"
+        justifyContent={'space-between'}
+        alignItems={'center'}
+        wrap="wrap"
+        marginBottom="2rem"
+        backgroundColor="midnightblue">
+        
+        <Heading level={1} color={'white'} fontSize={'xl'}>AWS Notes</Heading>
+        <Heading level={2} color={'white'} fontSize={'medium'}>Hello {user.attributes.email}</Heading>
+        <Button color={'white'} onClick={signOut}>Sign out</Button>
+      </Flex>
 
-      <Button onClick={() => setShowCreateForm(true)}>Add Note</Button>
+      <Button variation="primary" marginBottom="2rem" onClick={() => setShowCreateForm(true)}
+      >Add Note</Button>
 
-
-    {showCreateForm && (
-      <View
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '90%',
-          maxWidth: '500px',
-          zIndex: '2',
-        }}
-      >
-        <NoteCreateForm
-          onSuccess={() => {
-            fetchNotes();
-            setShowCreateForm(false);
+      {showCreateForm && (
+        <View
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            maxWidth: '500px',
+            zIndex: '2',
           }}
-          onCancel={() => setShowCreateForm(false)}
-          onError={() => setShowCreateForm(true)}
+        >
+          <NoteCreateForm
+            onSuccess={() => {
+              fetchNotes();
+              setShowCreateForm(false);
+            }}
+            onCancel={() => setShowCreateForm(false)}
+            onError={() => setShowCreateForm(true)}
 
-          overrides={{
-            title: {
-              style: { backgroundColor: 'white' },
-              textAlign: 'left'
-            },
-            description: {
-              style: { backgroundColor: 'white' },
-              textAlign: 'left'
-            }
-          }}
-        />
-      </View>
-    )}
-
-    {showUpdateForm && (
-      <View
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '90%',
-          maxWidth: '500px',
-          zIndex: '2',
-        }}
-      >
-      {showUpdateForm && (
-        <NoteUpdateForm
-          onSuccess={() => {
-            fetchNotes();
-            setShowUpdateForm(false);
-          }}
-          onCancel={() => setShowUpdateForm(false)}
-          onError={() => setShowUpdateForm(true)}
-          note={updateFormData}
-
-          overrides={{
-            title: {
-              style: { backgroundColor: 'white' },
-              textAlign: 'left'
-            },
-            description: {
-              style: { backgroundColor: 'white' },
-              textAlign: 'left'
-            }
-          }}
-        />
+            overrides={{
+              title: {
+                style: { backgroundColor: 'white' },
+                textAlign: 'left'
+              },
+              description: {
+                style: { backgroundColor: 'white' },
+                textAlign: 'left'
+              }
+            }}
+          />
+        </View>
       )}
-      </View>
-    )}
+
+      {showUpdateForm && (
+        <View
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            maxWidth: '500px',
+            zIndex: '2',
+          }}
+        >
+          {showUpdateForm && (
+            <NoteUpdateForm
+              onSuccess={() => {
+                fetchNotes();
+                setShowUpdateForm(false);
+              }}
+              onCancel={() => setShowUpdateForm(false)}
+              onError={() => setShowUpdateForm(true)}
+
+              // Pass the note data to the form
+              note={updateFormData}
+
+              overrides={{
+                title: {
+                  style: { backgroundColor: 'white' },
+                  textAlign: 'left'
+                },
+                description: {
+                  style: { backgroundColor: 'white' },
+                  textAlign: 'left'
+                }
+              }}
+            />
+          )}
+        </View>
+      )}
 
       <Collection
         items={notesState}
         type="list"
         direction="row"
+        justifyContent="center"
+        alignItems="flex-start"
         gap="20px"
         wrap="wrap"
+        padding="0 1rem"
         isPaginated={true}
       >
         {(item, index) => (
@@ -186,6 +201,7 @@ function App({ signOut, user }) {
             <Image
               src={imageUrls[item.image]}
               alt=""
+              maxHeight="200px"
 
             />
             <View padding="xs">
