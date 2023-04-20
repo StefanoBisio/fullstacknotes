@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-//used to fetch all notes
+// Imports for DataStore to fetch and manage notes
 import { DataStore } from '@aws-amplify/datastore';
 import { Note } from './models';
 
-//used to fetch the notes images from S3
+// Imports for Amplify Storage to fetch and manage images from S3
 import { Storage } from '@aws-amplify/storage';
 
 import { Amplify } from 'aws-amplify';
@@ -23,16 +23,19 @@ Amplify.configure(awsExports);
 
 function App({ signOut, user }) {
 
+  // State hooks
   const [notesState, setNotesState] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [updateFormData, setUpdateFormData] = useState([]);
   const [imageUrls, setImageUrls] = useState({});
 
+  // Fetch notes and their image URLs on component mount
   useEffect(() => {
     fetchNotesAndImageUrls();
   }, []);
 
+  // Function to fetch notes and their image URLs
   const fetchNotesAndImageUrls = async () => {
     const notesArray = await DataStore.query(Note);
     console.log("Fetched notes:", notesArray);
@@ -46,7 +49,7 @@ function App({ signOut, user }) {
     setImageUrls(urls);
   };
 
-  //delete note
+  // Function to delete a note and its associated image
   const deleteNote = async (noteId) => {
     const modelToDelete = await DataStore.query(Note, noteId);
 
@@ -64,7 +67,7 @@ function App({ signOut, user }) {
     fetchNotesAndImageUrls(); // Refetch the notes after deletion
   };
 
-  //Open the update form and feed it the data of the note to update
+  // Function to open the update form and feed it the data of the note to update
   const initializeUpdateForm = async (noteId) => {
     const noteToUpdate = await DataStore.query(Note, noteId);
     const idProp = noteToUpdate;
@@ -72,6 +75,7 @@ function App({ signOut, user }) {
     setUpdateFormData(idProp);
   };
 
+  // Custom delete icon component
   const IconDelete = () => {
     return (
       <Icon
@@ -93,10 +97,10 @@ function App({ signOut, user }) {
         wrap="wrap"
         marginBottom="2rem"
         backgroundColor="midnightblue">
-        
+
         <Heading level={1} color={'white'} fontSize={'xl'}>AWS Notes</Heading>
         <Heading level={2} color={'white'} fontSize={'medium'}>Hello {user.attributes.email}</Heading>
-        <Button color={'white'} onClick={signOut}>Sign out</Button>
+        <Button className='logOutButton' color={'white'} onClick={signOut}>Sign out</Button>
       </Flex>
 
       <Button variation="primary" marginBottom="2rem" onClick={() => setShowCreateForm(true)}
@@ -179,7 +183,6 @@ function App({ signOut, user }) {
         items={notesState}
         type="list"
         direction="row"
-        justifyContent="center"
         alignItems="flex-start"
         gap="20px"
         wrap="wrap"
@@ -226,7 +229,6 @@ function App({ signOut, user }) {
           </Card>
         )}
       </Collection>
-
 
     </View >
   );

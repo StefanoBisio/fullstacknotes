@@ -13,3 +13,8 @@
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1;
 }
+
+.logOutButton:hover,.logOutButton:focus {
+  background-color: transparent!important;
+  border-color: white!important;
+}
