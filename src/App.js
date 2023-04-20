@@ -103,6 +103,10 @@ function App({ signOut, user }) {
         <Button className='logOutButton' color={'white'} onClick={signOut}>Sign out</Button>
       </Flex>
 
+      <View textAlign="left" padding="0 1rem" maxWidth="900px" margin="auto">
+        <p>AWS Notes is a React full-stack CRUD web application designed to showcase familiarity in AWS services and related technologies. The application leverages <b>AWS Amplify</b> to manage user authentication, DataStore for handling notes, and S3 for storing images. The app incorporates a custom drag-and-drop file input component and a custom colour picker. By utilizing AWS services this app demonstrates the ability to build, configure, and deploy scalable and secure applications on the AWS platform.</p>
+      </View>
+
       <Button variation="primary" marginBottom="2rem" onClick={() => setShowCreateForm(true)}
       >Add Note</Button>
 
@@ -188,6 +192,8 @@ function App({ signOut, user }) {
         wrap="wrap"
         padding="0 1rem"
         isPaginated={true}
+        maxWidth="1200px"
+        margin="auto"
       >
         {(item, index) => (
           <Card
