@@ -30,19 +30,15 @@ function App({ signOut, user }) {
   const [imageUrls, setImageUrls] = useState({});
 
   useEffect(() => {
-    fetchNotes();
+    fetchNotesAndImageUrls();
   }, []);
 
-  const fetchNotes = async () => {
+  const fetchNotesAndImageUrls = async () => {
     const notesArray = await DataStore.query(Note);
     console.log("Fetched notes:", notesArray);
     setNotesState(notesArray);
-    fetchImageUrls(notesArray);
-  };
-
-  const fetchImageUrls = async (notes) => {
     const urls = {};
-    for (const note of notes) {
+    for (const note of notesArray) {
       if (note.image) {
         urls[note.image] = await Storage.get(note.image);
       }
@@ -65,7 +61,7 @@ function App({ signOut, user }) {
     }
 
     await DataStore.delete(modelToDelete);
-    fetchNotes(); // Refetch the notes after deletion
+    fetchNotesAndImageUrls(); // Refetch the notes after deletion
   };
 
   //Open the update form and feed it the data of the note to update
@@ -120,7 +116,7 @@ function App({ signOut, user }) {
         >
           <NoteCreateForm
             onSuccess={() => {
-              fetchNotes();
+              fetchNotesAndImageUrls();
               setShowCreateForm(false);
             }}
             onCancel={() => setShowCreateForm(false)}
@@ -155,7 +151,7 @@ function App({ signOut, user }) {
           {showUpdateForm && (
             <NoteUpdateForm
               onSuccess={() => {
-                fetchNotes();
+                fetchNotesAndImageUrls();
                 setShowUpdateForm(false);
               }}
               onCancel={() => setShowUpdateForm(false)}
