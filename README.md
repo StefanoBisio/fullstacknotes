@@ -1,3 +1,65 @@
+# AWS Notes
+
+AWS Notes is a React full-stack CRUD web application designed to showcase familiarity in AWS services and related technologies. 
+
+The application leverages AWS Amplify to manage user authentication, DataStore for handling notes, and S3 for storing images. It incorporates a custom drag-and-drop file input component and a custom colour picker. By utilizing AWS services this app demonstrates the ability to build, configure, and deploy scalable and secure applications on the AWS platform.
+
+Hosted on AWS Amplify: [AWS Notes](https://main.d29fwzvscz6ula.amplifyapp.com/)
+
+## Features
+
+- User authentication and authorization with AWS Amplify and Cognito
+- Create, read, update, and delete (CRUD) operations for notes
+- Real-time data synchronization Amplify DataStore
+- Image upload and storage using Amazon S3
+- Drag-and-drop image input with a custom React component
+- Responsive design
+
+## Technologies
+
+- React (Frontend)
+- AWS Amplify (Backend)
+- AWS Cognito (User authentication and authorization)
+- AWS DataStore (Client-side data management)
+- Amazon S3 (Image storage)
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-username/aws-notes.git
+```
+
+2. Install dependencies:
+
+```bash
+cd aws-notes
+npm install
+```
+
+3. Configure AWS Amplify:
+
+Follow the [official Amplify documentation](https://docs.amplify.aws/start/q/integration/react) to set up and configure the Amplify project with your AWS account.
+
+4. Run the application:
+
+```bash
+npm start
+```
+
+The application will now run on `http://localhost:3000`.
+
+## Usage
+
+1. Sign up or log in with your credentials.
+2. Create a new note by clicking the "Add Note" button.
+3. Add a title, content, and an optional image to the note.
+4. Save the note by clicking the "Save" button.
+5. View, edit, or delete your notes from the main dashboard.
+
+---
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
